@@ -1,7 +1,9 @@
 // Interaction smoke test: edit/save/reload, WIM jump, drag + recenter, tap-to-edit.
 import { chromium } from 'playwright';
 import { resolve } from 'path';
+// usage: node test/smoke.mjs <html> <storageKey> <example count>
 const file = 'file://' + resolve(process.argv[2]);
+const KEY = process.argv[3] || 'loci-skewer:v2', EXAMPLES = process.argv[4] || '7';
 const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 780 }, reducedMotion: 'reduce' });
 const page = await ctx.newPage();
@@ -12,7 +14,7 @@ const ready = () => page.waitForFunction(() => document.getElementById('loading'
 await page.goto(file); await ready();
 ok('hint shows on first visit', await page.isVisible('#hint'));
 await page.click('#hintOk');
-ok('example data counted', (await page.textContent('#fillLabel')) === '7');
+ok('example data counted', (await page.textContent('#fillLabel')) === EXAMPLES);
 
 await page.click('#nextBtn'); await page.click('#nextBtn');
 ok('caption follows nav', (await page.textContent('#capNo')) === '03');
@@ -21,7 +23,7 @@ await page.fill('#edItem', '테스트 항목'); await page.fill('#edImg', '테�
 await page.click('#editForm button[type=submit]');
 await page.reload(); await ready();
 ok('hint stays dismissed', !(await page.isVisible('#hint')));
-const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('loci-skewer:v2'))[2]);
+const saved = await page.evaluate(k => JSON.parse(localStorage.getItem(k))[2], KEY);
 ok('saved under storageKey', saved && saved.item === '테스트 항목' && saved.img === '테스트 연상');
 
 // WIM: open, then tap the projected spot of place 15

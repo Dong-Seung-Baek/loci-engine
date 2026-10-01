@@ -41,7 +41,7 @@ export interface PalaceOptions {
   build(ctx: BuildContext): LocusDef[];
   groups: string[];
   theme: { background: number; fog: [number, number]; wimBackground?: number };
-  wim: { position: Vec3; lookAt: Vec3 };
+  wim: { position: Vec3; lookAt: Vec3; markerScale?: number };
   hint?: string[];
   hintTitle?: string;
   example?: PalaceData;
@@ -50,7 +50,10 @@ export interface PalaceOptions {
   placeholders?: { item?: string; img?: string };
   seed?: number;
   minCamY?: number;     // drone never dips below this while travelling
+  railMinY?: number;    // floor for the brass route rail
+  sideSupport?: 'stays' | 'legs';  // side-deck supports: cables to the wall (default) or legs down
   preloadFonts?: string[];
+  ready?(ctx: BuildContext): void;   // after fonts load, before places are built (canvas text that needs the web fonts)
   onFrame?(time: number, dt: number): void;
   storage?: Storage;
   container?: HTMLElement;

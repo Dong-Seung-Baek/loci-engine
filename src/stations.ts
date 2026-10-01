@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { V, Y, TAU, type Helpers } from './helpers';
 import type { Locus } from './types';
 
-export function createStations(h: Helpers, scene: THREE.Scene) {
+// sideSupport: 'stays' angles cables back to the wall (decks high on a wall);
+// 'legs' drops short legs (decks just above a tabletop)
+export function createStations(h: Helpers, scene: THREE.Scene, o: { sideSupport: 'stays' | 'legs' }) {
   const { rod, box, bulb, ringFacing, M } = h;
   const deckTex = h.tex(64, 64, (g, w, hh) => {
     g.fillStyle = '#2b2a30'; g.fillRect(0, 0, w, hh); g.strokeStyle = '#c9953f'; g.globalAlpha = .45; g.lineWidth = 3;
@@ -64,7 +66,8 @@ export function createStations(h: Helpers, scene: THREE.Scene) {
       [-ex, ex].forEach(t => g.add(rod(at(t, -en + .4), at(t, -en + .4, 1.1), .05, M.steel)));
       g.add(rod(at(-ex, en, 1.1), at(ex, en, 1.1), .06, M.steel));
       [-ex, ex].forEach(t => g.add(rod(at(t, en, 1.1), at(t, -en + .4, 1.1), .05, M.steel)));
-      [-ex, ex].forEach(t => g.add(rod(at(t, en), at(t, en, -1.2), .05, M.steel)));
+      if (o.sideSupport === 'legs') [-ex, ex].forEach(t => g.add(rod(at(t, en), at(t, en, -1.2), .05, M.steel)));
+      else [-ex + .1, ex - .1].forEach(t => g.add(rod(at(t, en, 1.1), at(t, -D / 2 - .1, 2.8), .035, M.steel)));
       g.add(rod(at(-ex, en), at(-ex, en, 2.3), .05, M.steel));
       g.add(bulb(at(-ex, en, 2.4)));
       L.signPos = F.clone().addScaledVector(N, 1.2).addScaledVector(T, W / 2 + .7).add(V(0, .3, 0));

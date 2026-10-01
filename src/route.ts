@@ -7,7 +7,7 @@ export const ease = (k: number) => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2,
 
 // Fixed path between consecutive places: one centripetal Catmull-Rom per segment,
 // cam_i → via_{i+1}… → cam_{i+1}, plus a faint brass rail drawn just below it.
-export function createRoute(loci: Locus[], scene: THREE.Scene, o: { reduced: boolean; minCamY: number }) {
+export function createRoute(loci: Locus[], scene: THREE.Scene, o: { reduced: boolean; minCamY: number; railMinY: number }) {
   const segCurves: THREE.CatmullRomCurve3[] = [];
   for (let i = 0; i < loci.length - 1; i++) {
     const pts = [loci[i].cam, ...loci[i + 1].via, loci[i + 1].cam];
@@ -15,7 +15,7 @@ export function createRoute(loci: Locus[], scene: THREE.Scene, o: { reduced: boo
   }
   const railMat = new THREE.MeshBasicMaterial({ color: 0xd4a85a, transparent: true, opacity: .28 });
   segCurves.forEach(cv => {
-    const pts = cv.getPoints(40).map(p => p.clone().setY(Math.max(1.5, p.y - 1.3)));
+    const pts = cv.getPoints(40).map(p => p.clone().setY(Math.max(o.railMinY, p.y - 1.3)));
     scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, .07, 5, false), railMat));
   });
 

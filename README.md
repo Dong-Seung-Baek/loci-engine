@@ -22,7 +22,8 @@ LociEngine.create({
 
 - Build is IIFE (global `LociEngine`) with three.js r128 bundled and exposed as `LociEngine.THREE`, so it works from `file://`.
 - Place fields: `o`/`f`/`n` group, face, name · `F` surface point · `N` outward normal (picks the scaffolding) · `cam` drone position · `via` waypoints from the previous place · `w` deck width · `s` frame half width · `h` hanging frame height · `pin` lantern arm.
-- Other options: `hint`, `example`, `listNote`, `placeholders`, `loadingText`, `seed`, `minCamY`, `preloadFonts`, `onFrame(time, dt)`, `storage`.
+- Other options: `sideSupport` ('stays' cables to the wall, or 'legs' for decks just above a tabletop), `railMinY`, `ready(ctx)` (after fonts load), `hint`, `example`, `listNote`, `placeholders`, `loadingText`, `seed`, `minCamY`, `preloadFonts`, `onFrame(time, dt)`, `storage`.
+- `wim.markerScale` sizes the drone marker in the overview.
 - `h` helpers: `V Y TAU rnd std basic lam tex box rod ringFacing tube blob lump M bulb tower truss ladder`.
 
 ## Develop

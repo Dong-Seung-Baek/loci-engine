@@ -31,14 +31,15 @@ export function create(opts: PalaceOptions) {
 
   // ---------- palace content ----------
   const h = createHelpers(makeRnd(opts.seed ?? 7));
-  const defs = opts.build({ THREE, scene, renderer, h });
+  const ctx = { THREE, scene, renderer, h };
+  const defs = opts.build(ctx);
   const loci = defs.map((d, i) => ({
     ...d, i, F: toV(d.F), N: toV(d.N).normalize(), cam: toV(d.cam), via: (d.via || []).map(toV), item: null,
   })) as unknown as Locus[];
   const groups = opts.groups || [...new Set(loci.map(L => L.o))];
 
-  const stations = createStations(h, scene);
-  const route = createRoute(loci, scene, { reduced: REDUCED, minCamY: opts.minCamY ?? 2 });
+  const stations = createStations(h, scene, { sideSupport: opts.sideSupport ?? 'stays' });
+  const route = createRoute(loci, scene, { reduced: REDUCED, minCamY: opts.minCamY ?? 2, railMinY: opts.railMinY ?? 1.5 });
   const drone = createDroneCamera(canvas, loci[0].cam, loci[0].F);
   const camera = drone.camera;
 
@@ -79,7 +80,7 @@ export function create(opts: PalaceOptions) {
   });
 
   const wim = createWim({
-    scene, el: $('wim'), position: opts.wim.position, lookAt: opts.wim.lookAt,
+    scene, el: $('wim'), position: opts.wim.position, lookAt: opts.wim.lookAt, markerScale: opts.wim.markerScale,
     background: opts.theme.wimBackground ?? 0x100d0b, loci, onPick: i => travelTo(i, false),
   });
 
@@ -124,6 +125,7 @@ export function create(opts: PalaceOptions) {
     Promise.all(fonts.map(f => document.fonts.load(f, opts.title + '1'))),
     new Promise(r => setTimeout(r, 1800)),
   ]).catch(() => {}).then(() => {
+    opts.ready?.(ctx);
     loci.forEach(L => { stations.build(L); refreshItem(L.i); });
     resize(); hud();
     $('loading').hidden = true;

@@ -5,7 +5,7 @@ import type { Locus } from './types';
 // Worlds-in-miniature: a second camera drawn into a scissored corner of the same canvas.
 // The drone marker lives on layer 1, which only this camera sees.
 export function createWim(o: {
-  scene: THREE.Scene; el: HTMLElement; position: Vec3; lookAt: Vec3; background: number;
+  scene: THREE.Scene; el: HTMLElement; position: Vec3; lookAt: Vec3; markerScale?: number; background: number;
   loci: Locus[]; onPick: (i: number) => void;
 }) {
   const cam = new THREE.PerspectiveCamera(38, 1, 1, 400);
@@ -16,7 +16,7 @@ export function createWim(o: {
   const drone = new THREE.Group();
   const core = new THREE.Mesh(new THREE.SphereGeometry(1.1, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
   const ring = new THREE.Mesh(new THREE.TorusGeometry(2, .24, 8, 32), new THREE.MeshBasicMaterial({ color: 0xd4a85a })); ring.rotation.x = Math.PI / 2;
-  drone.add(core, ring); drone.traverse(c => c.layers.set(1)); o.scene.add(drone);
+  drone.add(core, ring); drone.scale.setScalar(o.markerScale ?? 1); drone.traverse(c => c.layers.set(1)); o.scene.add(drone);
 
   const isBig = () => o.el.classList.contains('big');
   const setBig = (on: boolean) => { o.el.classList.toggle('big', on); };
