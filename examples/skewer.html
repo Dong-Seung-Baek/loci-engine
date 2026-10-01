@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>꼬치 궁전</title>
+</head>
+<body>
+<script src="../dist/loci-engine.iife.js"></script>
+<script>
+LociEngine.create({
+  title: '꼬치 궁전',
+  subtitle: '잔 → 접시 둘레 → 꼬치 사이 골짜기 · 20곳',
+  storageKey: 'loci-skewer:v2',
+  loadingText: '꼬치를 굽는 중…',
+  theme: { background: 0x1a1512, fog: [75, 180], wimBackground: 0x100d0b },
+  wim: { position: [26, 78, 72], lookAt: [0, 2, -9] },
+  minCamY: 2,
+  groups: ['잔과 뒤쪽', '왼쪽', '가운데', '오른쪽과 앞쪽'],
+  placeholders: { item: '예: 호랑이 (인)', img: '예: 호랑이가 후추 알갱이에 재채기를 하며 포효한다' },
+  listNote: '경로는 고정이야. 유리잔과 물방울에서 출발해 접시 뒤를 지나 왼쪽 꼬치 둘레를 돌고, 꼬치 사이 골짜기로 낮게 파고들어. 가운데 꼬치를 넘어 둘째 골짜기와 오른쪽 꼬치 밑을 지나고, 식탁과 접시 앞을 거쳐 가운데 꼬치 끝에서 끝나. 저장한 내용은 이 기기 브라우저에만 남아.',
+  hint: [
+    '너는 거대한 꼬치 접시 위를 나는 드론이야. 이동은 정해진 경로로만 해.',
+    '‹ › 로 다음 장소로 날아가고, 화면을 드래그하면 고개만 돌릴 수 있어.',
+    '번호판이나 발판을 탭하면 그 장소에 기억을 놓을 수 있어.',
+    '오른쪽 위 작은 창은 식탁 전체 모습이야. 탭하면 커져.',
+  ],
+  example: {
+    0:{item:'쥐 (자)', img:'쥐가 유리잔 테두리를 쪼르르 돌며 남은 술을 핥아 먹는다', example:true},
+    1:{item:'소 (축)', img:'소가 식탁에 엎드려 거대한 물방울을 꿀꺽꿀꺽 마신다', example:true},
+    2:{item:'호랑이 (인)', img:'호랑이가 접시 뒤 테두리를 따라 어슬렁거리며 꼬치를 노린다', example:true},
+    3:{item:'토끼 (묘)', img:'토끼가 꼬치 손잡이 끝에 매달려 대롱대롱 흔들린다', example:true},
+    4:{item:'용 (진)', img:'용이 고기 밑 그늘에 숨어서 연기를 몰래 뿜는다', example:true},
+    5:{item:'뱀 (사)', img:'뱀이 접시 왼쪽 테두리를 한 바퀴 휘감고 꼬리를 문다', example:true},
+    6:{item:'말 (오)', img:'말이 파란 접시의 흰 광선 무늬를 따라 질주한다', example:true},
+  },
+
+  build({ THREE, scene, h }) {
+    const { V, Y, TAU, rnd, std, basic, tex, box, rod, lump } = h;
+
+    scene.add(new THREE.HemisphereLight(0xfff1dc, 0x3b2a1e, .62));
+    const key = new THREE.DirectionalLight(0xffe2bd, .9); key.position.set(-30, 70, 35); scene.add(key);
+    const fill = new THREE.PointLight(0xffc98a, .6, 90, 1.2); fill.position.set(20, 30, 30); scene.add(fill);
+
+    // ---------- table, glass ----------
+    const woodTex = tex(512, 512, (g,w,h) => {
+      g.fillStyle = '#8a5a36'; g.fillRect(0,0,w,h);
+      for (let i=0;i<160;i++){ const y = Math.random()*h; g.strokeStyle = `rgba(${Math.random()<.5?'60,34,16':'170,120,76'},${.12+Math.random()*.2})`; g.lineWidth = .6+Math.random()*2.4;
+        g.beginPath(); g.moveTo(0,y); for (let x=0;x<=w;x+=24) g.lineTo(x, y + Math.sin(x/90 + i*.7)*5); g.stroke(); }
+    }, [3,3]);
+    const table = new THREE.Mesh(new THREE.PlaneGeometry(260, 220), new THREE.MeshStandardMaterial({map:woodTex, roughness:.45, metalness:.05}));
+    table.rotation.x = -Math.PI/2; table.position.z = -20; scene.add(table);
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(300, 140), std(0x2a211b)); wall.position.set(0, 60, -120); scene.add(wall);
+
+    const glassPts = [[0,0],[5,0],[5.1,.5],[1.4,1.3],[1.1,4.2],[1.6,5.2],[5.4,8],[6.8,12],[6.5,17],[5.3,22],[5.6,24]].map(([x,y]) => new THREE.Vector2(x,y));
+    const glass = new THREE.Mesh(new THREE.LatheGeometry(glassPts, 48), new THREE.MeshStandardMaterial({color:0xdfe8f0, transparent:true, opacity:.2, roughness:.05, metalness:.3, side:THREE.DoubleSide, depthWrite:false}));
+    glass.position.set(5, 0, -46); scene.add(glass);
+    const rimG = new THREE.Mesh(new THREE.TorusGeometry(5.6, .16, 8, 48), new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:.55, roughness:.05}));
+    rimG.rotation.x = Math.PI/2; rimG.position.set(5, 24, -46); scene.add(rimG);
+    [[-2,-36,2],[1,-33,.9],[10,-37,1.1],[13,-34,.7],[-4,-40,.8]].forEach(([x,z,r]) => { const d = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 8), new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:.28, roughness:0})); d.scale.y = .18; d.position.set(x, .05, z); scene.add(d); });
+
+    // ---------- the plate: cobalt with brushed white rays ----------
+    const plateTex = tex(1024, 256, (g,w,h) => {
+      g.fillStyle = '#16266e'; g.fillRect(0,0,w,h);
+      // canvas bottom = centre of plate, top = rim (lathe v runs centre → rim)
+      for (let k=0;k<44;k++){
+        const x = k/44*w + Math.random()*6;
+        const grd = g.createLinearGradient(0, h*.78, 0, h*.12);
+        grd.addColorStop(0,'rgba(220,232,255,0)'); grd.addColorStop(.35,'rgba(220,232,255,.75)'); grd.addColorStop(1,'rgba(220,232,255,.15)');
+        g.fillStyle = grd; g.beginPath();
+        g.moveTo(x-2, h*.78); g.quadraticCurveTo(x+8, h*.45, x+3, h*.12); g.lineTo(x+13, h*.12); g.quadraticCurveTo(x+16, h*.45, x+4, h*.78); g.fill();
+      }
+      g.fillStyle = '#0f1c58'; g.fillRect(0, h*.78, w, h*.22);
+      g.fillStyle = '#dfe7f5'; g.fillRect(0, 0, w, h*.07);
+    });
+    const platePts = [[0,.6],[18,.6],[21,.7],[25,1.5],[28.5,2.7],[30,3],[30.6,2.8],[30.2,2.2],[27,1],[22,.3],[20,0],[0,0]].map(([x,y]) => new THREE.Vector2(x,y));
+    // top surface uses the patterned texture; the lathe covers the underside too
+    const plate = new THREE.Mesh(new THREE.LatheGeometry(platePts.slice(0,7), 96), new THREE.MeshStandardMaterial({map:plateTex, roughness:.18, metalness:.05, side:THREE.DoubleSide}));
+    scene.add(plate);
+    const under = new THREE.Mesh(new THREE.LatheGeometry(platePts.slice(6), 96), std(0xdfe5f0, {roughness:.3, side:THREE.DoubleSide}));
+    scene.add(under);
+    // pepper and grease on the plate
+    for (let k=0;k<70;k++){ const a = rnd()*TAU, r = 4 + rnd()*20; const d = new THREE.Mesh(new THREE.SphereGeometry(.12+rnd()*.12, 6, 4), basic(0x14100c)); d.position.set(Math.cos(a)*r, .66, Math.sin(a)*r); scene.add(d); }
+    [[-14,20,1.6],[5.3,9,2.1],[16,-8,1.4]].forEach(([x,z,r]) => { const d = new THREE.Mesh(new THREE.CircleGeometry(r, 20), new THREE.MeshStandardMaterial({color:0x5a3a1a, transparent:true, opacity:.5, roughness:.1})); d.rotation.x = -Math.PI/2; d.position.set(x, .64, z); scene.add(d); });
+
+    // ---------- skewers ----------
+    const meatTex = (base, extra) => tex(256, 256, (g,w,h) => {
+      g.fillStyle = base; g.fillRect(0,0,w,h);
+      for (let i=0;i<260;i++){ g.fillStyle = `rgba(${Math.random()<.5?'45,26,18':'140,98,78'},${.08+Math.random()*.12})`; g.beginPath(); g.arc(Math.random()*w, Math.random()*h, 3+Math.random()*14, 0, TAU); g.fill(); }
+      extra && extra(g,w,h);
+    });
+    const dots = (color, n, r) => (g,w,h) => { g.fillStyle = color; for (let i=0;i<n;i++){ g.beginPath(); g.arc(Math.random()*w, Math.random()*h, r*(.5+Math.random()), 0, TAU); g.fill(); } };
+    const MEAT = {
+      pepper: {tex: meatTex('#6f4838', dots('#140f0c', 160, 2.6))},
+      glossy: {tex: meatTex('#7a4c3a', dots('#140f0c', 30, 2)), rough:.28},
+      grill:  {tex: meatTex('#6c4535', (g,w,h) => { g.fillStyle = 'rgba(30,16,8,.8)'; for (let x=-h;x<w;x+=48){ g.save(); g.translate(x,0); g.rotate(.5); g.fillRect(0,-20,12,h*1.6); g.restore(); } dots('#140f0c', 40, 2)(g,w,h); })},
+      tip:    {tex: meatTex('#6d4637', dots('#140f0c', 50, 2))},
+      big:    {tex: meatTex('#714939', dots('#140f0c', 70, 2.4)), scale:1.2},
+      burnt:  {tex: meatTex('#5f3a2c', (g,w,h) => { const r = g.createRadialGradient(w*.2,h*.2,10,w*.2,h*.2,150); r.addColorStop(0,'rgba(20,10,4,.95)'); r.addColorStop(1,'rgba(20,10,4,0)'); g.fillStyle = r; g.fillRect(0,0,w,h); dots('#140f0c', 40, 2)(g,w,h); })},
+      chili:  {tex: meatTex('#724737', (g,w,h) => { dots('#c2261c', 90, 2.8)(g,w,h); dots('#140f0c', 50, 2)(g,w,h); })},
+      pink:   {tex: meatTex('#94604f', dots('#140f0c', 40, 2))},
+      herb:   {tex: meatTex('#6e4737', (g,w,h) => { dots('#4f7d2c', 110, 2.6)(g,w,h); dots('#140f0c', 40, 2)(g,w,h); })},
+      round:  {tex: meatTex('#6d4636', dots('#140f0c', 60, 2)), round:.85},
+      fat:    {tex: meatTex('#6f4736', dots('#140f0c', 40, 2)), fat:true},
+    };
+    const onionMat = (charred) => new THREE.MeshStandardMaterial({roughness:.35, map: tex(128, 128, (g,w,h) => {
+      g.fillStyle = '#ece6c2'; g.fillRect(0,0,w,h);
+      g.strokeStyle = 'rgba(160,170,90,.45)'; g.lineWidth = 2; for (let y=6;y<h;y+=14){ g.beginPath(); g.moveTo(0,y); g.lineTo(w,y+3); g.stroke(); }
+      if (charred){ g.fillStyle = 'rgba(70,40,10,.8)'; for (let i=0;i<12;i++){ g.beginPath(); g.arc(Math.random()*w, Math.random()<.5?4:h-4, 6+Math.random()*10, 0, TAU); g.fill(); } }
+    })});
+    const stickMat = std(0xd9bf85, {roughness:.7});
+
+    const SKEWERS = [
+      {name:'왼쪽 꼬치', a:V(-10.8,8.5,-29), b:V(-8.6,3.3,20), pieces:[
+        ['onion','맨 위 양파','char'],['meat','후추 박힌 고기','pepper'],['meat','기름 반짝이는 고기','glossy'],['onion','가운데 양파','plain'],['meat','그릴 자국 고기','grill'],['meat','꼬치 끝 고기','tip']]},
+      {name:'가운데 꼬치', a:V(1.2,8.8,-29), b:V(-.6,3.3,21), pieces:[
+        ['onion','맨 위 양파','plain'],['meat','큰 덩어리 고기','big'],['meat','탄 모서리 고기','burnt'],['onion','겹이 벌어진 양파','split'],['meat','고춧가루 고기','chili'],['meat','분홍 속살 고기','pink']]},
+      {name:'오른쪽 꼬치', a:V(12.2,8.5,-28), b:V(9.4,3.3,20), pieces:[
+        ['onion','맨 위 양파','char'],['meat','허브 뿌린 고기','herb'],['onion','그을린 양파','char'],['meat','둥근 고기','round'],['meat','비계 붙은 고기','fat'],['meat','꼬치 끝 고기','tip']]},
+    ];
+    const POS_WORD = ['손잡이 쪽','손잡이 쪽','가운데','가운데','끝 쪽','끝 쪽'];
+    SKEWERS.forEach((S, si) => {
+      const dir = S.b.clone().sub(S.a), len = dir.length(); dir.normalize();
+      scene.add(rod(S.a, S.b, .38, stickMat, 10));
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(.38, 1.6, 10), stickMat); tip.position.copy(S.b).addScaledVector(dir, .8); tip.quaternion.setFromUnitVectors(Y, dir); scene.add(tip);
+      S.centers = [];
+      S.pieces.forEach(([type, name, variant], k) => {
+        const t = (11.5 + k*6.1) / len;               // distance from the handle end
+        const c = S.a.clone().lerp(S.b, t);
+        let mesh, top;
+        if (type === 'meat'){
+          const m = MEAT[variant], sc = m.scale || 1;
+          const w = (5.2 + rnd()*.8)*sc, h = (4.4 + rnd()*.6)*sc, d = (4.8 + rnd()*.6)*sc;
+          c.y = Math.max(c.y, .6 + h*.5 - .2);
+          mesh = new THREE.Mesh(lump(w, h, d, m.round ?? .6, .1), new THREE.MeshStandardMaterial({map:m.tex, roughness:m.rough ?? .75}));
+          if (m.fat){ const f = new THREE.Mesh(lump(w*.9, h*.35, d*.95, .6, .05), std(0xf0e2cc, {roughness:.45})); f.position.set(0, h*.42, 0); mesh.add(f); }
+          top = h*.5;
+        } else {
+          const w = 5, h = 4.2, d = 2.2;
+          c.y = Math.max(c.y, .6 + h*.5 - .2);
+          const mat = onionMat(variant === 'char');
+          if (variant === 'split'){
+            mesh = new THREE.Group();
+            [-.75, .75].forEach(z => { const s = new THREE.Mesh(lump(w, h, .9, .35, .03), mat); s.position.z = z; s.rotation.x = z*.15; mesh.add(s); });
+          } else mesh = new THREE.Mesh(lump(w, h, d, .35, .03), mat);
+          top = h*.5;
+        }
+        mesh.position.copy(c);
+        mesh.lookAt(c.clone().add(dir)); mesh.rotateZ((rnd()-.5)*.5);
+        scene.add(mesh);
+        S.centers.push({c, top, type, name, variant, k});
+      });
+    });
+
+    // ---------- the route: around the plate, under and between the skewers ----------
+    const [SL, SM, SR] = SKEWERS;
+    const tipOf = S => { const d = S.b.clone().sub(S.a).normalize(); return S.b.clone().addScaledVector(d, 1.7); };
+    const underOf = (S, k, sx) => { const c = S.centers[k].c; return {F:V(c.x + sx*3.4, .66, c.z), cam:V(c.x + sx*11, 3.2, c.z + 4)}; };
+    const topOf = (S, k) => { const P = S.centers[k]; return P.c.clone().add(V(0, P.top - .1, 0)); };
+    const u5 = underOf(SL, 1, -1), u16 = underOf(SR, 3, 1);
+    const f11 = topOf(SM, 2), f15 = topOf(SR, 4);
+
+    // a knot in the tabletop for place 18
+    const knot = new THREE.Mesh(new THREE.CircleGeometry(3.2, 32), new THREE.MeshStandardMaterial({transparent:true, roughness:.5, map: tex(128,128,(g,w,h) => {
+      g.clearRect(0,0,w,h); for (let r=60;r>4;r-=6){ g.strokeStyle = `rgba(60,30,12,${.25 + (60-r)/100})`; g.lineWidth = 3; g.beginPath(); g.ellipse(64,64,r,r*.62,.3,0,TAU); g.stroke(); }
+      g.fillStyle = 'rgba(45,22,8,.9)'; g.beginPath(); g.ellipse(64,64,8,5,.3,0,TAU); g.fill(); })}));
+    knot.rotation.x = -Math.PI/2; knot.scale.set(1.4, 1, 1); knot.position.set(40, .03, 18); scene.add(knot);
+
+    return [
+      {o:'잔과 뒤쪽', f:'잔', n:'유리잔 테두리', F:V(5,24,-40.4), N:V(0,0,1), cam:V(5,29,-26), pin:true},
+      {o:'잔과 뒤쪽', f:'식탁', n:'잔 옆 물방울', F:V(-2,.3,-36), N:V(0,1,0), cam:V(-13,8,-46.5), s:1.5},
+      {o:'잔과 뒤쪽', f:'접시', n:'접시 뒤 테두리', F:V(-4.5,3.05,-29.5), N:V(-.15,0,-.99), cam:V(-6,9.5,-43), w:2.6},
+      {o:'왼쪽', f:'꼬치', n:'왼쪽 꼬치 손잡이 끝', F:SL.a.clone().add(V(0,.3,-.4)), N:V(0,0,-1), cam:V(-19,13,-38), pin:true},
+      {o:'왼쪽', f:'고기 아래', n:'왼쪽 꼬치 밑 그늘', F:u5.F, N:V(0,1,0), cam:u5.cam, s:1},
+      {o:'왼쪽', f:'접시', n:'접시 왼쪽 테두리', F:V(-29.8,3.05,-2), N:V(-1,0,0), cam:V(-42,9.5,2), w:2.6},
+      {o:'왼쪽', f:'접시', n:'흰 광선 무늬', F:V(-18,.66,14), N:V(0,1,0), cam:V(-24,10,25.5), s:1.6},
+      {o:'왼쪽', f:'꼬치', n:'왼쪽 꼬치 끝', F:tipOf(SL), N:V(0,0,1), cam:V(-11,7.5,30.5), pin:true},
+      {o:'가운데', f:'골짜기', n:'첫째 골짜기 입구', F:V(-4.6,.66,17), N:V(0,1,0), cam:V(-4.7,6,28), s:1.1},
+      {o:'가운데', f:'골짜기', n:'첫째 골짜기 안쪽', F:V(-5.2,.66,-10), N:V(0,1,0), cam:V(-5.1,4.2,3), s:1},
+      {o:'가운데', f:'꼬치', n:'가운데 꼬치 탄 고기', F:f11, N:V(0,1,0), cam:f11.clone().add(V(0,10,7.5)), s:1.5},
+      {o:'가운데', f:'꼬치', n:'가운데 꼬치 손잡이 끝', F:SM.a.clone().add(V(0,.3,-.4)), N:V(0,0,-1), cam:V(4.5,14,-38.5), pin:true},
+      {o:'가운데', f:'골짜기', n:'둘째 골짜기 안쪽', F:V(6.2,.66,-10), N:V(0,1,0), cam:V(6.3,4.2,-23), s:1.1},
+      {o:'가운데', f:'골짜기', n:'기름 웅덩이', F:V(5.3,.66,9), N:V(0,1,0), cam:V(5.5,4.5,-2), s:1.3},
+      {o:'오른쪽과 앞쪽', f:'꼬치', n:'오른쪽 꼬치 비계 고기', F:f15, N:V(0,1,0), cam:f15.clone().add(V(8.5,10,5)), s:1.5},
+      {o:'오른쪽과 앞쪽', f:'고기 아래', n:'오른쪽 꼬치 밑 그늘', F:u16.F, N:V(0,1,0), cam:u16.cam, s:1},
+      {o:'오른쪽과 앞쪽', f:'접시', n:'접시 오른쪽 테두리', F:V(29.8,3.05,1), N:V(1,0,0), cam:V(42,9.5,-2), w:2.6},
+      {o:'오른쪽과 앞쪽', f:'식탁', n:'나뭇결 옹이', F:V(40,.06,18), N:V(0,1,0), cam:V(47,10.5,29), s:1.8},
+      {o:'오른쪽과 앞쪽', f:'접시', n:'접시 앞 테두리', F:V(7.7,3.05,28.8), N:V(.26,0,.97), cam:V(12,10,42), w:2.6},
+      {o:'오른쪽과 앞쪽', f:'꼬치', n:'가운데 꼬치 끝', F:tipOf(SM), N:V(0,0,1), cam:V(0,7.5,32), pin:true},
+    ];
+  },
+});
+</script>
+</body>
+</html>

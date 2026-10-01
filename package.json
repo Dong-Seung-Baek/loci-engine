@@ -1,0 +1,26 @@
+{
+  "name": "loci-engine",
+  "version": "0.1.0",
+  "description": "Method-of-loci memory palace engine (three.js, drone view on a fixed route)",
+  "main": "dist/loci-engine.iife.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite build --watch"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/three": "^0.128.0",
+    "playwright": "^1.63.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  },
+  "dependencies": {
+    "three": "^0.128.0"
+  },
+  "files": [
+    "dist"
+  ]
+}
