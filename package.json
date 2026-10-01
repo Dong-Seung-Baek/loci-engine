@@ -1,6 +1,6 @@
 {
   "name": "loci-engine",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Method-of-loci memory palace engine (three.js, drone view on a fixed route)",
   "main": "dist/loci-engine.iife.js",
   "directories": {

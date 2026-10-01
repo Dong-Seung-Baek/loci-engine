@@ -67,6 +67,23 @@ const TEMPLATE = `
       <h2>경로 전체</h2>
       <p class="note" id="listNote"></p>
       <div id="listBody"></div>
+      <div class="grp backup">
+        <h3>백업</h3>
+        <p class="note" id="backupNote"></p>
+        <div class="row">
+          <button type="button" class="btn" id="exportBtn">파일로 내보내기</button>
+          <button type="button" class="btn" id="importBtn">파일에서 가져오기</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </div>
+        <div class="confirm" id="importConfirm" hidden>
+          <p class="note" id="importMsg"></p>
+          <div class="row">
+            <button type="button" class="btn primary" id="importYes">덮어쓰기</button>
+            <button type="button" class="btn" id="importNo">취소</button>
+          </div>
+        </div>
+        <p class="note error" id="importError" role="alert" hidden></p>
+      </div>
       <div class="row"><button type="button" class="btn" id="listClose">닫기</button></div>
     </div>
   </div>

@@ -23,6 +23,7 @@ LociEngine.create({
 - Build is IIFE (global `LociEngine`) with three.js r128 bundled and exposed as `LociEngine.THREE`, so it works from `file://`.
 - Place fields: `o`/`f`/`n` group, face, name · `F` surface point · `N` outward normal (picks the scaffolding) · `cam` drone position · `via` waypoints from the previous place · `w` deck width · `s` frame half width · `h` hanging frame height · `pin` lantern arm.
 - Other options: `sideSupport` ('stays' cables to the wall, or 'legs' for decks just above a tabletop), `railMinY`, `ready(ctx)` (after fonts load), `hint`, `example`, `listNote`, `placeholders`, `loadingText`, `seed`, `minCamY`, `preloadFonts`, `onFrame(time, dt)`, `storage`.
+- Backup: the list sheet (목록) can save every place to a JSON file and restore it. Imports are checked against the palace's `storageKey` and place count and only overwrite after an in-page confirmation. `LociEngine.parseBackup` / `makeBackup` expose the same format.
 - `wim.markerScale` sizes the drone marker in the overview.
 - `h` helpers: `V Y TAU rnd std basic lam tex box rod ringFacing tube blob lump M bulb tower truss ladder`.
 
@@ -33,6 +34,7 @@ npm install
 npm run build                                 # dist/loci-engine.iife.js
 node test/shots.mjs examples/skewer.html out  # 390×780 screenshot per place (swiftshader)
 node test/smoke.mjs examples/skewer.html      # edit/save/reload, overview jump, recenter
+node test/backup.mjs examples/skewer.html     # export → wipe → import, rejects foreign/broken files
 ```
 
 Tests serve this checkout's `dist` in place of any jsDelivr-pinned engine, so palace files that live elsewhere can be tested against unreleased changes. CI fails if the committed `dist/` is stale or a `v*` tag doesn't match `package.json`.

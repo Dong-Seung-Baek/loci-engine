@@ -6,12 +6,14 @@ import { createRoute } from './route';
 import { createDroneCamera } from './camera';
 import { updateOcclusion } from './occlusion';
 import { createWim } from './wim';
+import { wireBackup } from './backup';
 import { localStore, type PalaceData } from './storage';
 import type { Locus, PalaceOptions } from './types';
 
 export { THREE };
 export type { PalaceOptions, LocusDef, Locus, BuildContext } from './types';
-export type { Storage, PalaceData, Entry } from './storage';
+export type { Storage, PalaceData, Entry, Backup } from './storage';
+export { parseBackup, makeBackup } from './storage';
 
 export const version = __VERSION__;
 
@@ -71,7 +73,13 @@ export function create(opts: PalaceOptions) {
   $('prevBtn').onclick = () => travelTo(cur - 1, false);
   $('nextBtn').onclick = () => travelTo(cur + 1, false);
   $('recenterBtn').onclick = drone.recenter;
-  $('listBtn').onclick = () => { ui.renderList(loci, data, groups, i => travelTo(i, false)); $('listSheet').hidden = false; };
+  const renderList = () => ui.renderList(loci, data, groups, i => travelTo(i, false));
+  const backup = wireBackup({
+    ui, store, storageKey: opts.storageKey, title: opts.title, places: loci.length,
+    getData: () => data,
+    setData: d => { data = d; store.save(data); loci.forEach(L => refreshItem(L.i)); hud(); renderList(); },
+  });
+  $('listBtn').onclick = () => { renderList(); backup.onOpen(); $('listSheet').hidden = false; };
   $('listClose').onclick = () => { $('listSheet').hidden = true; };
   addEventListener('keydown', e => {
     if ((e.target as HTMLElement).matches('input,textarea')) return;
