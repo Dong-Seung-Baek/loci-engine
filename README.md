@@ -35,4 +35,6 @@ node test/shots.mjs examples/skewer.html out  # 390×780 screenshot per place (s
 node test/smoke.mjs examples/skewer.html      # edit/save/reload, overview jump, recenter
 ```
 
+Tests serve this checkout's `dist` in place of any jsDelivr-pinned engine, so palace files that live elsewhere can be tested against unreleased changes. CI fails if the committed `dist/` is stale or a `v*` tag doesn't match `package.json`.
+
 MIT licensed. Fonts (Marcellus, Gowun Batang, Noto Sans KR) load from Google Fonts under the OFL.

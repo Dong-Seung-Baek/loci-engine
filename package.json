@@ -22,5 +22,10 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dong-Seung-Baek/loci-engine.git"
+  },
+  "homepage": "https://github.com/Dong-Seung-Baek/loci-engine#readme"
 }

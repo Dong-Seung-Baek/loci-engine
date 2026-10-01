@@ -2,12 +2,16 @@
 // usage: node test/shots.mjs <html> <outdir>
 import { chromium } from 'playwright';
 import { mkdirSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 const [file, out] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+// palaces pinned to a jsDelivr tag get this checkout's dist instead, so unreleased engine changes can be tested
+const DIST = resolve(dirname(fileURLToPath(import.meta.url)), '../dist/loci-engine.iife.js');
+await page.route(/cdn\.jsdelivr\.net\/gh\/[^/]+\/loci-engine@[^/]+\/dist\/loci-engine\.iife\.js/, r => r.fulfill({ path: DIST, contentType: 'text/javascript' }));
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });

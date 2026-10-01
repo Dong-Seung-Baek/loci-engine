@@ -1,12 +1,16 @@
 // Interaction smoke test: edit/save/reload, WIM jump, drag + recenter, tap-to-edit.
 import { chromium } from 'playwright';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 // usage: node test/smoke.mjs <html> <storageKey> <example count>
 const file = 'file://' + resolve(process.argv[2]);
 const KEY = process.argv[3] || 'loci-skewer:v2', EXAMPLES = process.argv[4] || '7';
 const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 780 }, reducedMotion: 'reduce' });
 const page = await ctx.newPage();
+// palaces pinned to a jsDelivr tag get this checkout's dist instead, so unreleased engine changes can be tested
+const DIST = resolve(dirname(fileURLToPath(import.meta.url)), '../dist/loci-engine.iife.js');
+await page.route(/cdn\.jsdelivr\.net\/gh\/[^/]+\/loci-engine@[^/]+\/dist\/loci-engine\.iife\.js/, r => r.fulfill({ path: DIST, contentType: 'text/javascript' }));
 const errors = []; page.on('pageerror', e => errors.push(e.message));
 const ok = (name, cond) => console.log(cond ? 'PASS' : 'FAIL', name);
 const ready = () => page.waitForFunction(() => document.getElementById('loading').hidden);
