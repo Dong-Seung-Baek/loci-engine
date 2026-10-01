@@ -1,0 +1,25 @@
+name: ci
+
+# jsDelivr serves dist/ straight from the tagged commit, so the committed bundle must match the source.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: dist is up to date
+        run: git diff --exit-code -- dist/ || (echo "::error::dist/ is stale — run npm run build and commit" && exit 1)
+      - name: tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: test "${GITHUB_REF_NAME}" = "v$(node -p 'require(\"./package.json\").version')"
